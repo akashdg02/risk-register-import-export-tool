@@ -1,0 +1,5 @@
+You are a Risk Management Expert. Analyze the following risk title and provide a professional description.
+Risk Title: {title}
+
+Return ONLY a JSON object with this key:
+"description": "A detailed 2-3 sentence explanation of the risk impact and context."
