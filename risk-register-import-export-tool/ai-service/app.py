@@ -5,6 +5,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
 # Configure logging for audit and error tracking 
+# Line 8 fix
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
