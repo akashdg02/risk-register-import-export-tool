@@ -9,8 +9,8 @@ load_dotenv()
 
 class GroqClient:
     def __init__(self):
-        # Retrieve the key from the environment
-        api_key = os.getenv("GROQ_API_KEY")
+        # Change this line in groq_client.py
+        self.model = "llama-3.3-70b-versatile"
         
         if not api_key:
             raise ValueError("GROQ_API_KEY not found. Ensure your .env file is correct.")
