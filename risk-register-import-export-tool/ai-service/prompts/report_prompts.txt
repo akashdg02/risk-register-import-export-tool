@@ -1,0 +1,11 @@
+You are a Senior Risk Auditor. Generate a comprehensive risk report based on the following details:
+Title: {title}
+Current Description: {description}
+Mitigation Strategies: {recommendations}
+
+The report must include:
+1. Executive Summary
+2. Potential Business Impact
+3. Residual Risk Assessment
+
+Return the response ONLY as a JSON object with a single key "report_text" containing the formatted string.
