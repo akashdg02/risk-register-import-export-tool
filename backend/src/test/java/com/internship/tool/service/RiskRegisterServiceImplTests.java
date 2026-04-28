@@ -25,6 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
 class RiskRegisterServiceImplTests {
@@ -84,6 +87,45 @@ class RiskRegisterServiceImplTests {
 
         assertThat(responses).hasSize(1);
         assertThat(responses.get(0).getStatus()).isEqualTo("Open");
+    }
+
+    @Test
+    void shouldUpdateRiskRegisterWhenRequestIsValid() {
+        RiskRegisterRequest request = createRequest();
+        RiskRegister existingRisk = createRiskEntity(1L, true);
+        RiskRegister updatedRisk = createRiskEntity(1L, true);
+        updatedRisk.setTitle("Updated title");
+        request.setTitle("Updated title");
+
+        when(riskRegisterRepository.findById(1L)).thenReturn(Optional.of(existingRisk));
+        when(riskRegisterRepository.findByRiskCode("RISK-101")).thenReturn(Optional.of(existingRisk));
+        when(riskRegisterRepository.save(any(RiskRegister.class))).thenReturn(updatedRisk);
+
+        RiskRegisterResponse response = riskRegisterService.updateRiskRegister(1L, request);
+
+        assertThat(response.getId()).isEqualTo(1L);
+        assertThat(response.getTitle()).isEqualTo("Updated title");
+        verify(riskRegisterRepository).save(any(RiskRegister.class));
+    }
+
+    @Test
+    void shouldThrowInvalidRiskDataExceptionWhenStatusFilterIsBlank() {
+        assertThatThrownBy(() -> riskRegisterService.getRiskRegistersByStatus("  "))
+            .isInstanceOf(InvalidRiskDataException.class)
+            .hasMessageContaining("Status is required");
+    }
+
+    @Test
+    void shouldReturnPaginatedRiskRegisters() {
+        PageRequest pageable = PageRequest.of(0, 5);
+        Page<RiskRegister> page = new PageImpl<>(List.of(createRiskEntity(1L, true)), pageable, 1);
+        when(riskRegisterRepository.findAll(pageable)).thenReturn(page);
+
+        Page<RiskRegisterResponse> responses = riskRegisterService.getAllRiskRegisters(pageable);
+
+        assertThat(responses.getTotalElements()).isEqualTo(1);
+        assertThat(responses.getContent()).hasSize(1);
+        assertThat(responses.getContent().get(0).getRiskCode()).isEqualTo("RISK-101");
     }
 
     @Test

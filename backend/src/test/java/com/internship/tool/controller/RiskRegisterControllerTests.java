@@ -119,6 +119,20 @@ class RiskRegisterControllerTests {
             .andExpect(jsonPath("$.status").value(409));
     }
 
+    @Test
+    @WithMockUser(roles = "USER")
+    void shouldReturnInternalServerErrorAsConsistentJson() throws Exception {
+        when(riskRegisterService.getAllRiskRegisters(any()))
+            .thenThrow(new RuntimeException("Unexpected database failure"));
+
+        mockMvc.perform(get("/risk-registers/all?page=0&size=5"))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.status").value(500))
+            .andExpect(jsonPath("$.error").value("Internal Server Error"))
+            .andExpect(jsonPath("$.message").value("An unexpected error occurred"))
+            .andExpect(jsonPath("$.path").value("/risk-registers/all"));
+    }
+
     private RiskRegisterRequest createRequest() {
         RiskRegisterRequest request = new RiskRegisterRequest();
         request.setRiskCode("RISK-201");

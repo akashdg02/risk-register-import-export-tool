@@ -85,6 +85,18 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, message, request.getRequestURI());
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiErrorResponse> handleUnexpectedException(
+        Exception exception,
+        HttpServletRequest request
+    ) {
+        return buildErrorResponse(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "An unexpected error occurred",
+            request.getRequestURI()
+        );
+    }
+
     private String formatFieldError(FieldError fieldError) {
         return fieldError.getField() + ": " + fieldError.getDefaultMessage();
     }
