@@ -1,5 +1,6 @@
 package com.internship.tool.service;
 
+import com.internship.tool.config.CacheConfig;
 import com.internship.tool.dto.RiskRegisterRequest;
 import com.internship.tool.dto.RiskRegisterResponse;
 import com.internship.tool.entity.RiskRegister;
@@ -15,6 +16,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +36,10 @@ public class RiskRegisterServiceImpl implements RiskRegisterService {
     }
 
     @Override
+    @CacheEvict(
+        cacheNames = {CacheConfig.RISK_REGISTER_BY_ID_CACHE, CacheConfig.RISK_REGISTER_PAGE_CACHE},
+        allEntries = true
+    )
     public RiskRegisterResponse createRiskRegister(RiskRegisterRequest request) {
         validateRequest(request);
         validateUniqueRiskCode(request.getRiskCode(), null);
@@ -42,6 +49,10 @@ public class RiskRegisterServiceImpl implements RiskRegisterService {
     }
 
     @Override
+    @CacheEvict(
+        cacheNames = {CacheConfig.RISK_REGISTER_BY_ID_CACHE, CacheConfig.RISK_REGISTER_PAGE_CACHE},
+        allEntries = true
+    )
     public RiskRegisterResponse updateRiskRegister(Long id, RiskRegisterRequest request) {
         validateRequest(request);
 
@@ -54,6 +65,7 @@ public class RiskRegisterServiceImpl implements RiskRegisterService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheConfig.RISK_REGISTER_BY_ID_CACHE, key = "#id")
     public RiskRegisterResponse getRiskRegisterById(Long id) {
         return mapToResponse(getRiskOrThrow(id));
     }
@@ -70,6 +82,10 @@ public class RiskRegisterServiceImpl implements RiskRegisterService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+        cacheNames = CacheConfig.RISK_REGISTER_PAGE_CACHE,
+        key = "'page=' + #pageable.pageNumber + ':size=' + #pageable.pageSize + ':sort=' + #pageable.sort.toString()"
+    )
     public Page<RiskRegisterResponse> getAllRiskRegisters(Pageable pageable) {
         return riskRegisterRepository.findAll(pageable)
             .map(this::mapToResponse);
@@ -102,6 +118,10 @@ public class RiskRegisterServiceImpl implements RiskRegisterService {
     }
 
     @Override
+    @CacheEvict(
+        cacheNames = {CacheConfig.RISK_REGISTER_BY_ID_CACHE, CacheConfig.RISK_REGISTER_PAGE_CACHE},
+        allEntries = true
+    )
     public RiskRegisterResponse deactivateRiskRegister(Long id) {
         RiskRegister riskRegister = getActiveRiskOrThrow(id);
         riskRegister.setActive(Boolean.FALSE);
