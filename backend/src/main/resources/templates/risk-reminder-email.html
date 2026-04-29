@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Risk Register Daily Reminder</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #1f2937;">
+<p th:text="'Hello ' + ${ownerName} + ','">Hello User,</p>
+<p>The following risks are approaching their target resolution dates:</p>
+<table style="border-collapse: collapse; width: 100%;">
+    <thead>
+    <tr>
+        <th style="border: 1px solid #d1d5db; padding: 8px; text-align: left;">Risk Code</th>
+        <th style="border: 1px solid #d1d5db; padding: 8px; text-align: left;">Title</th>
+        <th style="border: 1px solid #d1d5db; padding: 8px; text-align: left;">Target Date</th>
+        <th style="border: 1px solid #d1d5db; padding: 8px; text-align: left;">Days Remaining</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="risk : ${risks}">
+        <td style="border: 1px solid #d1d5db; padding: 8px;" th:text="${risk.riskCode}">RISK-001</td>
+        <td style="border: 1px solid #d1d5db; padding: 8px;" th:text="${risk.title}">Title</td>
+        <td style="border: 1px solid #d1d5db; padding: 8px;" th:text="${risk.targetResolutionDate}">2026-04-30</td>
+        <td style="border: 1px solid #d1d5db; padding: 8px;" th:text="${daysRemaining[risk.id]}">2</td>
+    </tr>
+    </tbody>
+</table>
+<p>Please review and update these items before their deadlines.</p>
+</body>
+</html>

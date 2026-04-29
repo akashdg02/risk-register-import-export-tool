@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Risk Register Deadline Alert</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #1f2937;">
+<p th:text="'Hello ' + ${ownerName} + ','">Hello User,</p>
+<p th:text="'This is a deadline alert for risks due on ' + ${today} + '.'">This is a deadline alert.</p>
+<ul>
+    <li th:each="risk : ${risks}">
+        <strong th:text="${risk.riskCode}">RISK-001</strong>
+        <span th:text="' - ' + ${risk.title} + ' (' + ${risk.priority} + ')'"> - Title (High)</span>
+    </li>
+</ul>
+<p>Please take action as soon as possible.</p>
+</body>
+</html>

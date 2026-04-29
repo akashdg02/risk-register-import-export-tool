@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:risk_register_test_db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+  flyway:
+    enabled: false
+
+  data:
+    redis:
+      repositories:
+        enabled: false
+
+  mail:
+    host: localhost
+    port: 2525
+
+app:
+  jwt:
+    secret: test-jwt-secret-key-with-at-least-thirty-two-characters
+    expiration-ms: 86400000
+    refresh-expiration-ms: 604800000
+    issuer: risk-register-import-export-tool-test
+  notifications:
+    from-email: no-reply@example.com
+    reminder-cron: 0 0 9 * * *
+    reminder-window-days: 3
