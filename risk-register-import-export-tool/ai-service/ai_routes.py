@@ -8,7 +8,6 @@ from groq import Groq
 ai_bp = Blueprint('ai', __name__)
 
 # Initialize Groq Client
-# Ensure GROQ_API_KEY is set in your .env file
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 MODEL_NAME = "llama-3.3-70b-specdec"
 
@@ -26,8 +25,6 @@ def token_required(f):
         if not token:
             return jsonify({'message': 'Unauthorized. JWT Token is missing.', 'is_fallback': True}), 401
         
-        # Note for Day 18 Audit: In full production, you would decode and verify 
-        # the token against the Java backend's secret key here using PyJWT.
         return f(*args, **kwargs)
     return decorated
 
@@ -52,13 +49,12 @@ def describe_risk():
         return jsonify({'error': 'Title is required'}), 400
 
     try:
-        # Prompt Engineering: Setting the AI's persona and constraints
         prompt = f"Act as a cybersecurity and enterprise risk expert. Provide a concise, 2-3 sentence technical description for a risk titled: '{title}'."
         
         chat_completion = client.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
             model=MODEL_NAME,
-            temperature=0.3, # Low temperature for technical, factual accuracy
+            temperature=0.3,
             max_tokens=150
         )
         
@@ -67,7 +63,6 @@ def describe_risk():
 
     except Exception as e:
         print(f"Groq API Error: {e}")
-        # 🚨 FALLBACK LOGIC: Prevents UI crash if Groq is offline
         fallback_desc = f"A critical system risk involving '{title}' that requires immediate assessment and mitigation planning."
         return jsonify({"description": fallback_desc, "is_fallback": True}), 200
 
@@ -80,7 +75,6 @@ def recommend_mitigation():
     description = data.get('description', '')
 
     try:
-        # Strict Prompting: Forcing the LLM to return UI-ready JSON
         prompt = f"""
         Analyze the following risk description and provide exactly 3 mitigation strategies.
         You MUST return ONLY a valid JSON object with a single key 'recommendations' containing an array of 3 objects.
@@ -92,19 +86,17 @@ def recommend_mitigation():
             messages=[{"role": "user", "content": prompt}],
             model=MODEL_NAME,
             temperature=0.1, # Extremely low temp for strict JSON adherence
-            response_format={"type": "json_object"} # Forces Groq to output valid JSON
+            response_format={"type": "json_object"} # 🚨 CRITICAL: Forces valid JSON output
         )
         
         result_text = chat_completion.choices[0].message.content.strip()
         parsed_data = json.loads(result_text)
         
-        # Extract the array to send back to React
         recommendations = parsed_data.get('recommendations', [])
         return jsonify(recommendations), 200
 
     except Exception as e:
         print(f"Groq API Error or Parsing Failed: {e}")
-        # 🚨 FALLBACK LOGIC: Hardcoded safety array
         fallback_recs = [
             {"priority": "High", "action_type": "Investigate", "description": "Immediately audit the affected system components."},
             {"priority": "Medium", "action_type": "Update Policy", "description": "Review and update standard operating procedures."},
