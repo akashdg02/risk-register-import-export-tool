@@ -12,7 +12,7 @@ client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 MODEL_NAME = "llama-3.3-70b-specdec"
 
 # ==========================================
-# 🛡️ SECURITY: JWT Authorization Decorator
+# SECURITY: JWT Authorization Decorator
 # ==========================================
 def token_required(f):
     @wraps(f)
@@ -29,7 +29,7 @@ def token_required(f):
     return decorated
 
 # ==========================================
-# 🚦 ENDPOINTS
+# ENDPOINTS
 # ==========================================
 
 @ai_bp.route('/health', methods=['GET'])
@@ -85,8 +85,8 @@ def recommend_mitigation():
         chat_completion = client.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
             model=MODEL_NAME,
-            temperature=0.1, # Extremely low temp for strict JSON adherence
-            response_format={"type": "json_object"} # 🚨 CRITICAL: Forces valid JSON output
+            temperature=0.1, 
+            response_format={"type": "json_object"} 
         )
         
         result_text = chat_completion.choices[0].message.content.strip()
