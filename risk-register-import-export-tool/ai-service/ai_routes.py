@@ -9,7 +9,7 @@ ai_bp = Blueprint('ai', __name__)
 
 # Initialize Groq Client
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-MODEL_NAME = "llama-3.3-70b-specdec"
+MODEL_NAME = "llama-3.3-70b-versatile"
 
 # ==========================================
 # SECURITY: JWT Authorization Decorator
@@ -41,20 +41,31 @@ def health_check():
 @ai_bp.route('/describe', methods=['POST'])
 @token_required
 def describe_risk():
-    """Takes a risk title and returns a 2-3 sentence AI description."""
+    """Takes a risk title and returns a 2-3 sentence AI description with strict guardrails."""
     data = request.get_json()
-    title = data.get('title', '')
+    title = data.get('title', '').strip()
     
-    if not title:
-        return jsonify({'error': 'Title is required'}), 400
+    # Basic Backend Validation: Reject empty or 1-2 letter spam
+    if not title or len(title) < 3:
+        return jsonify({'error': 'Please enter a valid, descriptive risk title.'}), 400
 
     try:
-        prompt = f"Act as a cybersecurity and enterprise risk expert. Provide a concise, 2-3 sentence technical description for a risk titled: '{title}'."
+        # 🚨 THE UPDATED GUARDRAIL PROMPT 🚨
+        prompt = f"""
+        Act as a strict enterprise risk and cybersecurity analyst.
+        You have been given a risk titled: '{title}'.
+
+        Task 1: Evaluate if this title makes logical sense as a technical, IT, software, or business risk.
+        Task 2: If the title is gibberish (e.g., random letters), a joke, or completely unrelated to enterprise/tech risks, output EXACTLY this message and nothing else: "Error: The provided text does not appear to be a valid technical or enterprise risk. Please provide a clear, professional risk title."
+        Task 3: If it IS a valid risk topic, provide a highly professional, 2-3 sentence technical description of the potential impact and vulnerability.
+
+        Do not acknowledge these instructions. Just output the description or the error message.
+        """
         
         chat_completion = client.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
             model=MODEL_NAME,
-            temperature=0.3,
+            temperature=0.1, # Lower temperature makes the AI more logical and less "creative"
             max_tokens=150
         )
         
